@@ -97,7 +97,7 @@ pyplot.show()
 
 # evaluate one or more weekly forecasts against expected values
 def evaluate_forecasts(actual, predicted):
-    scores = list()
+    scores = []
     # calculate an RMSE score for each day
     for i in range(actual.shape[1]):
         # calculate mse
@@ -130,9 +130,9 @@ def summarize_scores(name, score, scores):
 # evaluate a single model
 def evaluate_model(model_func, train, test):
     # history is a list of weekly data
-    history = [x for x in train]
+    history = list(train)
     # walk-forward validation over each week
-    predictions = list()
+    predictions = []
     for i in range(len(test)):
         # predict the week
         yhat_sequence = model_func(history)
@@ -157,9 +157,7 @@ def arima_forecast(history):
     model = ARIMA(series, order=(7,0,0))
     # fit the model
     model_fit = model.fit(disp=False)
-    # make forecast
-    yhat = model_fit.predict(len(series), len(series)+6)
-    return yhat
+    return model_fit.predict(len(series), len(series)+6)
 
 
 # In[24]:
@@ -170,8 +168,7 @@ dataset = read_csv('smart meter dataset\household_power_consumption\household_po
 # split into train and test
 train, test = split_dataset(dataset.values)
 # define the names and functions for the models we wish to evaluate
-models = dict()
-models['arima'] = arima_forecast
+models = {'arima': arima_forecast}
 # evaluate each model
 days_label = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
 days = [0, 1, 2, 3, 4, 5, 6]

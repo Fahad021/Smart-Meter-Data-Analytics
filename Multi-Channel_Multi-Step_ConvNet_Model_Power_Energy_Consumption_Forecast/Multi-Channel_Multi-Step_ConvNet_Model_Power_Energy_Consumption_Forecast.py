@@ -40,7 +40,7 @@ def split_dataset(data):
 
 # evaluate one or more weekly forecasts against expected values
 def evaluate_forecasts(actual, predicted):
-    scores = list()
+    scores = []
     # calculate an RMSE score for each day
     for i in range(actual.shape[1]):
         # calculate mse
@@ -73,10 +73,9 @@ def summarize_scores(name, score, scores):
 def to_supervised(train, n_input, n_out=7):
     # flatten data
     data = train.reshape((train.shape[0]*train.shape[1], train.shape[2]))
-    X, y = list(), list()
-    in_start = 0
+    X, y = [], []
     # step over the entire history one time step at a time
-    for _ in range(len(data)):
+    for in_start, _ in enumerate(range(len(data))):
         # define the end of the input sequence
         in_end = in_start + n_input
         out_end = in_end + n_out
@@ -84,8 +83,6 @@ def to_supervised(train, n_input, n_out=7):
         if out_end < len(data):
             X.append(data[in_start:in_end, :])
             y.append(data[in_end:out_end, 0])
-        # move along one time step
-        in_start += 1
     return array(X), array(y)
 
 
@@ -141,18 +138,18 @@ def forecast(model, history, n_input):
 def evaluate_model(train, test, n_input):
     # fit model
     model = build_and_train_model(train, n_input)
-    
+
     model.save('models/ConvNet_Multivariate_Input_Model.h5')
 
     # architecture to JSON, weights to HDF5
     model.save_weights('models/ConvNet_Multivariate_Input_Model_Weights.h5')
     with open('models/ConvNet_Multivariate_Input_Model_architecture.json', 'w') as f:
             f.write(model.to_json())
-    
+
     # history is a list of weekly data
-    history = [x for x in train]
+    history = list(train)
     # walk-forward validation over each week
-    predictions = list()
+    predictions = []
     for i in range(len(test)):
         # predict the week
         yhat_sequence = forecast(model, history, n_input)
@@ -177,12 +174,12 @@ def load_pretrained_model(train, test, n_input):
     with open('models/ConvNet_Multivariate_Input_Model_architecture.json') as f:
         model = model_from_json(f.read())
     model.load_weights('models/ConvNet_Multivariate_Input_Model_Weights.h5')
-    
-    
+
+
     # history is a list of weekly data
-    history = [x for x in train]
+    history = list(train)
     # walk-forward validation over each week
-    predictions = list()
+    predictions = []
     for i in range(len(test)):
         # predict the week
         yhat_sequence = forecast(model, history, n_input)

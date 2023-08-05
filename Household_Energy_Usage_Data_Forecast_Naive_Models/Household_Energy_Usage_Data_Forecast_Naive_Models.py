@@ -61,7 +61,7 @@ def split_dataset(data):
 
 # evaluate one or more weekly forecasts against expected values
 def evaluate_forecasts(actual, predicted):
-    scores = list()
+    scores = []
     # calculate an RMSE score for each day
     for i in range(actual.shape[1]):
         # calculate mse
@@ -93,9 +93,9 @@ def summarize_scores(name, score, scores):
 # evaluate a single model
 def evaluate_model(model_func, train, test):
     # history is a list of weekly data
-    history = [x for x in train]
+    history = list(train)
     # walk-forward validation over each week
-    predictions = list()
+    predictions = []
     for i in range(len(test)):
         # predict the week
         yhat_sequence = model_func(history)
@@ -118,9 +118,7 @@ def daily_persistence(history):
     last_week = history[-1]
     # get the total active power for the last day
     value = last_week[-1, 0]
-    # prepare 7 day forecast
-    forecast = [value for _ in range(7)]
-    return forecast
+    return [value for _ in range(7)]
 
 # weekly persistence model
 def weekly_persistence(history):
@@ -166,10 +164,11 @@ print(test.shape)
 print(test[0, 0, 0], test[-1, -1, 0])
 
 # define the names and functions for the models we wish to evaluate
-models = dict()
-models['daily'] = daily_persistence
-models['weekly'] = weekly_persistence
-models['weekly-yeargap'] = week_one_year_ago_persistence
+models = {
+    'daily': daily_persistence,
+    'weekly': weekly_persistence,
+    'weekly-yeargap': week_one_year_ago_persistence,
+}
 # evaluate each model
 days_label = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
 
@@ -178,7 +177,7 @@ days = [0, 1, 2, 3, 4, 5, 6]
 i=0
 
 for name, func in models.items():
-    
+
     # evaluate and get scores
     score, scores = evaluate_model(func, train, test)
     # summarize scores
@@ -189,7 +188,7 @@ for name, func in models.items():
     pyplot.xlabel(days_label)
     pyplot.ylabel("RMSE Daily Forecast Error")
     i=i+1
-    
+
 
 pyplot.legend()
 pyplot.show()
